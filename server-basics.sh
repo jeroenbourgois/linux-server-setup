@@ -51,4 +51,3 @@ bash < <(curl -s https://rvm.beginrescueend.com/install/rvm)
 
 # NGINX
 # apt-get --force-yes install nginx
-
