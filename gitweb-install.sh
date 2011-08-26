@@ -51,7 +51,7 @@ echo "Installing fcgiwrap dependencies"
 apt-get -qq -y install libfcgi-dev
 echo
 echo "Installing fcgiwrap"
-git clone git://github.com/gnosek/fcgiwrap.git /tmp
+git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
 autoreconf -i /tmp/fcgiwrap
 /tmp/fcgiwrap/configure
 make /tmp/fcgiwrap/Makefile
