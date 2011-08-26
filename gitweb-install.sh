@@ -1,28 +1,32 @@
 #!/usr/bin/env bash
 
-echo
-echo
-echo
-echo "------------------------------------"
-echo "Installation of gitweb behind NGINX,"
-echo "using spawn-cgi and fcgiwrap"
-echo "------------------------------------"
-echo
-echo
-echo
-echo
-echo
+# check for root
+if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+  echo "NOT RUNNING AS ROOT! ABORT."
+  exit
+fi
+
+
+printf "
+
+------------------------------------
+Installation of gitweb behind NGINX,
+using spawn-cgi and fcgiwrap
+------------------------------------
+
+"
+
 echo -n "Do you want to install NGINX? [y/n]:"
 read
 
 if [ $REPLY = y ] ; then
 	echo "Installing NGINX ..."
-	apt-get -q -y install nginx
+	apt-get -qq -y install nginx
 fi
 
 echo
 echo "Installing gitweb ..."
-apt-get -q -y install gitweb
+apt-get -qq-y install gitweb
 echo
 echo -n "Create directory for your repos? [y/n]:"
 read
@@ -30,17 +34,21 @@ read
 if [ $REPLY = y ] ; then
 	echo -n "Path for the repo folder? [/var/repos]:"
 	read
-	echo $REPLY
-	mkdir -p $REPLY
-	chmod 777 $REPLY
+  if [[ -z "$REPLY" ]]; then
+  	DIR = "/var/repos"
+  else
+  	DIR = $REPLY
+  fi
+	mkdir -p $DIR
+	chmod 777 $DIR
 fi
 
 echo
 echo "Installing spawn-fcgi"
-apt-get -q -y install spawn-fcgi
+apt-get -qq -y install spawn-fcgi
 echo
 echo "Installing fcgiwrap dependencies"
-apt-get -q -y install libfcgi-dev
+apt-get -qq -y install libfcgi-dev
 echo
 echo "Installing fcgiwrap"
 git clone git://github.com/gnosek/fcgiwrap.git /tmp
@@ -49,30 +57,30 @@ autoreconf -i /tmp/fcgiwrap
 make /tmp/fcgiwrap/Makefile
 make /tmp/fcgiwrap/Makefile install
 
-echo
-echo
-echo
-echo "Installation OK!"
-echo
-echo "Next steps:"
-echo "-----------"
-echo "\tspawn an instance of spawn-fcgi (change settings if you need):"
-echo "\tspawn-fcgi -f /usr/local/sbin/fcgiwrap -a 127.0.0.1 -p 9001"
-echo
-echo "\tupdate the nginx server configuration:"
-echo ""
-echo "\tserver {"
-echo "\t    listen 80;"
-echo "\t    server_name mc.raynes.me;"
-echo "\t    location / {"
-echo "\t        root /usr/share/gitweb;"
-echo "\t        if (!-f \$request_filename) {"
-echo "\t            fastcgi_pass   127.0.0.1:9001;"
-echo "\t        }"
-echo "\t        fastcgi_index  index.cgi;"
-echo "\t        fastcgi_param  SCRIPT_FILENAME  /usr/share/gitweb/gitweb.cgi;"
-echo "\t        include        fastcgi_params;"
-echo "\t    }"
-echo "\t}"
+printf "
+Installation OK!
+
+Next steps:
+-----------
+spawn an instance of spawn-fcgi (change settings if you need):
+  spawn-fcgi -f /usr/local/sbin/fcgiwrap -a 127.0.0.1 -p 9001
+
+update the nginx server configuration:
+
+  server {
+      listen 80;
+      server_name mc.raynes.me;
+      location / {
+          root /usr/share/gitweb;
+          if (!-f \$request_filename) {
+              fastcgi_pass   127.0.0.1:9001;
+          }
+          fastcgi_index  index.cgi;
+          fastcgi_param  SCRIPT_FILENAME  /usr/share/gitweb/gitweb.cgi;
+          include        fastcgi_params;
+      }
+  }
+"
+
 exit 0;
 
