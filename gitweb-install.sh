@@ -35,9 +35,9 @@ if [ $REPLY = y ] ; then
 	echo -n "Path for the repo folder? [/var/repos]:"
 	read
   if [[ -z "$REPLY" ]]; then
-  	DIR = "/var/repos"
+  	DIR="/var/repos"
   else
-  	DIR = $REPLY
+  	DIR=$REPLY
   fi
 	mkdir -p $DIR
 	chmod 777 $DIR
