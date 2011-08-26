@@ -26,7 +26,7 @@ fi
 
 echo
 echo "Installing gitweb ..."
-apt-get -qq-y install gitweb
+apt-get -qq -y install gitweb
 echo
 echo -n "Create directory for your repos? [y/n]:"
 read
