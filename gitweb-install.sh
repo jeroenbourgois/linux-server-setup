@@ -54,8 +54,8 @@ echo "Installing fcgiwrap"
 git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
 autoreconf -i /tmp/fcgiwrap
 /tmp/fcgiwrap/configure
-make -c /tmp/fcgiwrap/
-make -c /tmp/fcgiwrap/ install
+make -C /tmp/fcgiwrap/
+make -C /tmp/fcgiwrap/ install
 
 printf "
 Installation OK!
