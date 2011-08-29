@@ -1,68 +1,53 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+##################################
+# Small script to install gitweb #
+##################################
+
+# HELPER FUNCTIONS
 
 # check for root
-if [[ $(/usr/bin/id -u) -ne 0 ]]; then
-  echo "NOT RUNNING AS ROOT! ABORT."
-  exit
-fi
+check_root() {
+  if [[ $(/usr/bin/id -u) -ne 0 ]]; then
+    echo
+    echo "#####################################"
+    echo "Error: NOT RUNNING AS ROOT! ABORTING."
+    echo "#####################################"
+    echo
+    usage;
+    exit 0;
+  fi
+}
 
-
-printf "
-
+# help info
+usage() {
+  printf "
 ------------------------------------
 Installation of gitweb behind NGINX,
 using spawn-cgi and fcgiwrap
 ------------------------------------
 
-"
+You need to run the script as root, there is no way all of this will install as normal user :P
 
-echo -n "Do you want to install NGINX? [y/n]:"
-read
+Options:
+ 
+  -h  : show this message
+  -n  : install the default nginx package
+  -f  : omits the install spawnfcgi to spawn fcgi processes (if you have another spawner, it's fine)
+  -s  : omits the installation of fcgiwrap (needed for nginx)
+  "
+  exit 0;
+}
 
-if [ $REPLY = y ] ; then
-	echo "Installing NGINX ..."
-	apt-get -qq -y install nginx
-fi
+finish() {
+  printf "
+******************************
 
-echo
-echo "Installing gitweb ..."
-apt-get -qq -y install gitweb
-echo
-echo -n "Create directory for your repos? [y/n]:"
-read
-
-if [ $REPLY = y ] ; then
-	echo -n "Path for the repo folder? [/var/repos]:"
-	read
-  if [[ -z "$REPLY" ]]; then
-  	DIR="/var/repos"
-  else
-  	DIR=$REPLY
-  fi
-	mkdir -p $DIR
-	chmod 777 $DIR
-fi
-
-echo
-echo "Installing spawn-fcgi"
-apt-get -qq -y install spawn-fcgi
-echo
-echo "Installing fcgiwrap dependencies"
-apt-get -qq -y install libfcgi-dev
-echo
-echo "Installing fcgiwrap"
-git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
-autoreconf -i /tmp/fcgiwrap
-/tmp/fcgiwrap/configure
-make -C /tmp/fcgiwrap/
-make -C /tmp/fcgiwrap/ install
-
-printf "
 Installation OK!
 
 Next steps:
 -----------
-spawn an instance of spawn-fcgi (change settings if you need):
+spawn an instance of spawn-fcgi (or your own, change settings if you need):
   spawn-fcgi -f /usr/local/sbin/fcgiwrap -a 127.0.0.1 -p 9001
 
 update the nginx server configuration:
@@ -80,7 +65,73 @@ update the nginx server configuration:
           include        fastcgi_params;
       }
   }
-"
 
+update the gitweb.conf file (located by default in /etc/gitweb.conf):
+
+"
+}
+
+
+# check for root
+check_root
+
+# ACTUAL INSTALL
+
+nginx=false
+spawnfcgi=true
+fcgiwrap=true
+
+while getopts "hnfs" opt; do 
+  case $opt in
+    h)
+      usage
+      ;;
+    n)
+      nginx=true
+      ;;
+    f)
+      spawnfcgi=false
+      ;;
+    s)
+      fcgiwrap=false
+      ;;
+  esac 
+done
+
+echo "Starting installation:"
+if $nginx ; then
+  echo "Installing NGINX ..."
+  apt-get -qq -y install nginx
+fi
+
+echo "Installing gitweb ..."
+apt-get -qq -y install gitweb
+
+if $spawnfcgi ; then
+  echo "Installing spawn-fcgi"
+  apt-get -qq -y install spawn-fcgi
+fi
+
+if $fcgiwrap ; then
+  echo "Installing fcgiwrap dependencies"
+  apt-get -qq -y install libfcgi-dev
+
+  echo "Installing fcgiwrap"
+
+  if [ -d "/tmp/fcgiwrap" ] ; then
+    curdir=${PWD}
+    cd /tmp/fcgiwrap
+    git pull
+    cd $curdir
+  else
+    git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
+    autoreconf -i /tmp/fcgiwrap
+    /tmp/fcgiwrap/configure
+    make -C /tmp/fcgiwrap/
+    make -C /tmp/fcgiwrap/ install
+  fi
+fi
+
+finish;
 exit 0;
 
