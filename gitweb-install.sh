@@ -149,11 +149,11 @@ if $themed ; then
   curdir=${PWD}
 
   if [ -d "/tmp/gitweb-theme" ] ; then
-    cd /tmp/fcgiwrap
+    cd /tmp/gitweb-theme
     git pull
     cd $curdir
   else
-    git clone https://github.com/kogakure/gitweb-theme.git gitweb-theme
+    git clone https://github.com/kogakure/gitweb-theme.git /tmp/gitweb-theme
   fi
 
   mv /usr/share/gitweb/static/gitweb.css /usr/share/gitweb/static/gitweb.css.old
