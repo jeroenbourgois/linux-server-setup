@@ -14,8 +14,8 @@ check_root() {
     echo "Error: NOT RUNNING AS ROOT! ABORTING."
     echo "#####################################"
     echo
-    usage;
-    exit 0;
+    usage
+    exit 0
   fi
 }
 
@@ -36,7 +36,7 @@ Options:
   -f  : omits the install spawnfcgi to spawn fcgi processes (if you have another spawner, it's fine)
   -s  : omits the installation of fcgiwrap (needed for nginx)
   "
-  exit 0;
+  exit 0
 }
 
 finish() {
@@ -54,7 +54,8 @@ update the nginx server configuration:
 
   server {
       listen 80;
-      server_name mc.raynes.me;
+      server_name yourdomain.com;
+
       location / {
           root /usr/share/gitweb;
           if (!-f \$request_filename) {
@@ -117,21 +118,22 @@ if $fcgiwrap ; then
   apt-get -qq -y install libfcgi-dev
 
   echo "Installing fcgiwrap"
+  curdir=${PWD}
 
   if [ -d "/tmp/fcgiwrap" ] ; then
-    curdir=${PWD}
     cd /tmp/fcgiwrap
     git pull
     cd $curdir
   else
     git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
-    autoreconf -i /tmp/fcgiwrap
-    /tmp/fcgiwrap/configure
-    make -C /tmp/fcgiwrap/
-    make -C /tmp/fcgiwrap/ install
+    cd /tmp/fcgiwrap
+    autoreconf -i
+    ./configure
+    make 
+    make install
+    cd $curdir
   fi
 fi
 
-finish;
-exit 0;
-
+finish
+exit 0
