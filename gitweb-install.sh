@@ -127,12 +127,13 @@ if $fcgiwrap ; then
   else
     git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
     cd /tmp/fcgiwrap
-    autoreconf -i
-    ./configure
-    make 
-    make install
-    cd $curdir
   fi
+
+  autoreconf -i
+  ./configure
+  make 
+  make install
+  cd $curdir
 fi
 
 finish
