@@ -129,19 +129,16 @@ if $fcgiwrap ; then
   curdir=${PWD}
 
   if [ -d "/tmp/fcgiwrap" ] ; then
-    cd /tmp/fcgiwrap
-    git pull
-    cd $curdir
+  	echo "      > You seem to have the fcgiwrap repo, recompile yourself if needed!"
   else
     git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
     cd /tmp/fcgiwrap
+    autoreconf -i
+    ./configure
+    make 
+    make install
+    cd $curdir
   fi
-
-  autoreconf -i
-  ./configure
-  make 
-  make install
-  cd $curdir
 fi
 
 if $themed ; then
@@ -157,9 +154,9 @@ if $themed ; then
   fi
 
   mv /usr/share/gitweb/static/gitweb.css /usr/share/gitweb/static/gitweb.css.old
-  mv /usr/share/gitweb/static/gitweb.js /usr/share/gitweb/static/gitweb.css.old
-  cp /tmp/gitweb-theme/gitweb.css /usr/share/gitweb/static
-  cp /tmp/gitweb-theme/gitweb.js /usr/share/gitweb/static
+  mv /usr/share/gitweb/static/gitweb.js /usr/share/gitweb/static/gitweb.js.old
+  cp /tmp/gitweb-theme/gitweb.css /usr/share/gitweb/static/gitweb.css
+  cp /tmp/gitweb-theme/gitweb.js /usr/share/gitweb/static/gitweb.js
 fi
 
 finish
