@@ -10,9 +10,9 @@
 check_root() {
   if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo
-    echo "#####################################"
-    echo "Error: NOT RUNNING AS ROOT! ABORTING."
-    echo "#####################################"
+    echo "#####################################" > /tmp/gitweb-install.log
+    echo "Error: NOT RUNNING AS ROOT! ABORTING." > /tmp/gitweb-install.log
+    echo "#####################################" > /tmp/gitweb-install.log
     echo
     usage
     exit 0
@@ -35,7 +35,8 @@ Options:
   -n  : install the default nginx package
   -f  : omits the install spawnfcgi to spawn fcgi processes (if you have another spawner, it's fine)
   -s  : omits the installation of fcgiwrap (needed for nginx)
-  "
+  -t  : omits the github theme for gitweb, using the default theme (github theme by kogakure, http://github.com/kogakure/gitweb-theme)
+  " > /tmp/gitweb-install.log
   exit 0
 }
 
@@ -69,7 +70,8 @@ update the nginx server configuration:
 
 update the gitweb.conf file (located by default in /etc/gitweb.conf):
 
-"
+The extra theme has copied the old css file for safety to .old in the /usr/share/gitweb/static folder :)
+" > /tmp/gitweb-install.log
 }
 
 
@@ -78,9 +80,12 @@ check_root
 
 # ACTUAL INSTALL
 
+touch /tmp/gitweb-install.log
+
 nginx=false
 spawnfcgi=true
 fcgiwrap=true
+themed=true
 
 while getopts "hnfs" opt; do 
   case $opt in
@@ -96,28 +101,31 @@ while getopts "hnfs" opt; do
     s)
       fcgiwrap=false
       ;;
+    t)
+      themed=false
+      ;;
   esac 
 done
 
 echo "Starting installation:"
 if $nginx ; then
-  echo "Installing NGINX ..."
+  echo "Installing NGINX ..." > /tmp/gitweb-install.log
   apt-get -qq -y install nginx
 fi
 
-echo "Installing gitweb ..."
+echo "Installing gitweb ..." > /tmp/gitweb-install.log
 apt-get -qq -y install gitweb
 
 if $spawnfcgi ; then
-  echo "Installing spawn-fcgi"
+  echo "Installing spawn-fcgi" > /tmp/gitweb-install.log
   apt-get -qq -y install spawn-fcgi
 fi
 
 if $fcgiwrap ; then
-  echo "Installing fcgiwrap dependencies"
+  echo "Installing fcgiwrap dependencies" > /tmp/gitweb-install.log
   apt-get -qq -y install libfcgi-dev
 
-  echo "Installing fcgiwrap"
+  echo "Installing fcgiwrap" > /tmp/gitweb-install.log
   curdir=${PWD}
 
   if [ -d "/tmp/fcgiwrap" ] ; then
@@ -134,6 +142,24 @@ if $fcgiwrap ; then
   make 
   make install
   cd $curdir
+fi
+
+if $themed ; then
+  echo "Installing github theme for gitweb by kogakure" > /tmp/gitweb-install.log
+  curdir=${PWD}
+
+  if [ -d "/tmp/gitweb-theme" ] ; then
+    cd /tmp/fcgiwrap
+    git pull
+    cd $curdir
+  else
+    git clone https://github.com/kogakure/gitweb-theme.git gitweb-theme
+  fi
+
+  mv /usr/share/gitweb/static/gitweb.css /usr/share/gitweb/static/gitweb.css.old
+  mv /usr/share/gitweb/static/gitweb.js /usr/share/gitweb/static/gitweb.css.old
+  cp /tmp/gitweb-theme/gitweb.css /usr/share/gitweb/static
+  cp /tmp/gitweb-theme/gitweb.js /usr/share/gitweb/static
 fi
 
 finish
