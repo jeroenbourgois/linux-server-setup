@@ -10,9 +10,9 @@
 check_root() {
   if [[ $(/usr/bin/id -u) -ne 0 ]]; then
     echo
-    echo "#####################################" > /tmp/gitweb-install.log
-    echo "Error: NOT RUNNING AS ROOT! ABORTING." > /tmp/gitweb-install.log
-    echo "#####################################" > /tmp/gitweb-install.log
+    echo "#####################################"
+    echo "Error: NOT RUNNING AS ROOT! ABORTING."
+    echo "#####################################"
     echo
     usage
     exit 0
@@ -36,7 +36,7 @@ Options:
   -f  : omits the install spawnfcgi to spawn fcgi processes (if you have another spawner, it's fine)
   -s  : omits the installation of fcgiwrap (needed for nginx)
   -t  : omits the github theme for gitweb, using the default theme (github theme by kogakure, http://github.com/kogakure/gitweb-theme)
-  " > /tmp/gitweb-install.log
+  "
   exit 0
 }
 
@@ -71,7 +71,7 @@ update the nginx server configuration:
 update the gitweb.conf file (located by default in /etc/gitweb.conf):
 
 The extra theme has copied the old css file for safety to .old in the /usr/share/gitweb/static folder :)
-" > /tmp/gitweb-install.log
+"
 }
 
 
@@ -79,8 +79,6 @@ The extra theme has copied the old css file for safety to .old in the /usr/share
 check_root
 
 # ACTUAL INSTALL
-
-touch /tmp/gitweb-install.log
 
 nginx=false
 spawnfcgi=true
@@ -109,29 +107,29 @@ done
 
 echo "Starting installation:"
 if $nginx ; then
-  echo "Installing NGINX ..." > /tmp/gitweb-install.log
+  echo "Installing NGINX ..."
   apt-get -qq -y install nginx
 fi
 
-echo "Installing gitweb ..." > /tmp/gitweb-install.log
+echo "Installing gitweb ..."
 apt-get -qq -y install gitweb
 
 if $spawnfcgi ; then
-  echo "Installing spawn-fcgi" > /tmp/gitweb-install.log
+  echo "Installing spawn-fcgi"
   apt-get -qq -y install spawn-fcgi
 fi
 
 if $fcgiwrap ; then
-  echo "Installing fcgiwrap dependencies" > /tmp/gitweb-install.log
+  echo "Installing fcgiwrap dependencies"
   apt-get -qq -y install libfcgi-dev
 
-  echo "Installing fcgiwrap" > /tmp/gitweb-install.log
-  curdir=${PWD}
+  echo "Installing fcgiwrap"
 
   if [ -d "/tmp/fcgiwrap" ] ; then
   	echo "      > You seem to have the fcgiwrap repo, recompile yourself if needed!"
   else
     git clone git://github.com/gnosek/fcgiwrap.git /tmp/fcgiwrap
+    curdir=${PWD}
     cd /tmp/fcgiwrap
     autoreconf -i
     ./configure
@@ -142,7 +140,7 @@ if $fcgiwrap ; then
 fi
 
 if $themed ; then
-  echo "Installing github theme for gitweb by kogakure" > /tmp/gitweb-install.log
+  echo "Installing github theme for gitweb by kogakure"
   curdir=${PWD}
 
   if [ -d "/tmp/gitweb-theme" ] ; then
