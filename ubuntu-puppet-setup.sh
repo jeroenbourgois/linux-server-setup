@@ -15,11 +15,11 @@ _log() {
 }
 
 _print() {
-  printf $COL_BLUE"\n$1\n"$COL_RESET > /root/manifest
+  printf $COL_BLUE"\n$1\n"$COL_RESET >> /root/manifest
 }
 
 _error() {
-  _print $COL_RED"Error:\n$1\n" > /root/manifest
+  _print $COL_RED"Error:\n$1\n" >> /root/manifest
 }
 
 # check for root
@@ -28,13 +28,12 @@ if [[ $(/usr/bin/id -u) -ne 0 ]]; then
   exit 0
 fi
 
+_log ""
 _log "Preparing machine for puppet, started on `date`"
-
-_log "Setup keyboard layout"
-dpkg-reconfigure keyboard-configuration
+_log ""
 
 _log "Install dependencies"
-apt-get install libopenssl-ruby rdoc libopenssl-ruby1.8 libreadline-ruby1.8 libruby1.8 rdoc1.8 ruby1.8
+apt-get install libopenssl-ruby rdoc libopenssl-ruby1.8 libreadline-ruby1.8 libruby1.8 rdoc1.8 ruby1.8 git
 
 _log "Get puppet and facter"
 _log "Files coming from http://puppetlabs.com/misc/download-options/"
